@@ -1,3 +1,4 @@
+//IMPORTANT: Requires angleBetween()
 //result: outputs tangent point on asteroid between target and location
 //point: input current location
 //targ: input target location
