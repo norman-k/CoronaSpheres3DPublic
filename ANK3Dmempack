@@ -129,4 +129,15 @@ void rotate(bool ccw, float axis[3], float deg) {
     }
     
 }
-// We need a power down function
+//Pseudocode for power down function + grabbing memory pack
+//Memory Pack Grab:
+// Get location of memory pack
+// setPositionTarget(location of memory pack)
+// setAttitudeTarget(mempack)
+// grabmempack()
+//Power Down:
+// getMyZRState()
+// unsigned int getTime()
+// if (solar flare countdown = true)
+//      time < 5 (until solar flare)
+// powerdown()
