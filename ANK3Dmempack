@@ -1,0 +1,132 @@
+//Anmolpreet and Norman
+//Compilation of Previous 3D competitor code with modifcations listed below:
+//Change in strategy: Grabbing the closest memory pack after first 2 pictures are taken
+//Change in strategy (cont.): Powering Down during a solar flare as opposed to heading for the shadow zone
+
+int counter;
+// Seconds elapsed 
+
+float position[3];
+float axis[3];
+
+float deltaAtt;
+float startingAtt[3];
+
+
+void init(){
+	//This function is called once when your code is first loaded.
+
+	//IMPORTANT: make sure to set any variables that need an initial value.
+	//Do not assume variables will be set to 0 automatically!
+	counter = 0;
+	
+    position[0] = 1.0f;
+    position[1] = 1.0f;
+    position[2] = 1.0f;
+    axis[0] = 0.0f;
+    axis[1] = 1.0f;
+    axis[2] = 0.0f;
+}
+
+void loop(){
+    
+    // BEGIN: Misc.
+	//This function is called once per second.  Use it to control the satellite.
+    //goTo(position);
+    //DEBUG(("%i", counter));
+    // END: Misc.
+    
+    // BEGIN: Get starting attitude
+    float myState[12];
+    api.getMyZRState(myState);
+    for (int i = 0; i < 3; i++) {
+        startingAtt[i] = myState[i + 6];
+    }
+
+    // END: Get starting attitude
+    
+    // BEGIN: Function calls
+    rotate(true, axis, 3.14159);
+    // END: Function calls
+    
+}
+
+float angleBetween(float A[3], float B[3]) {
+    
+    // The dot product can be calculated from the components of two vectors.
+    // It can also be calculated from their magnitudes and the angle between them.
+    // Setting these two equal, we can solve for the angle. 
+    // This gives us a generalized equation for the angle between two
+    // vectors in 3-space.
+    
+    // Note that you don't need to use this function when you're
+    // working with attitudes. Attitudes are normalized vectors 
+    // and there will be some wasted operations here. 
+    
+    float dotProduct = mathVecInner(A, B, 3);
+    float magnitudeA = mathVecMagnitude(A, 3);
+    float magnitudeB = mathVecMagnitude(B, 3);
+    
+    float angle = acos(dotProduct / (magnitudeA * magnitudeB));
+    
+    return angle; 
+}
+
+float angleBetweenAtt(float A[3], float B[3]) {
+    
+    
+    
+    float dotProduct = mathVecInner(A, B, 3);
+    
+    float angle = acos(dotProduct);
+    
+    return angle; 
+}
+
+void goTo(float posTarget[3]) {
+    api.setPositionTarget(posTarget);
+}
+
+void rotate(bool ccw, float axis[3], float deg) {
+    
+    float myState[12];
+    api.getMyZRState(myState);
+    float myAtt[3];
+    for (int i = 0; i < 3; i++) {
+        myAtt[i] = myState[i + 6];
+    }
+    
+    
+    deltaAtt = angleBetweenAtt(startingAtt, myAtt);
+        
+    while (deltaAtt < deg) {
+        float myState[12];
+        api.getMyZRState(myState);
+    
+        float myAtt[3];
+        
+        for (int i = 0; i < 3; i++) {
+            myAtt[i] = myState[i + 6];
+        }
+        
+        mathVecNormalize(axis, 3);
+        
+        float perpAttitude[3];
+        
+        if (ccw) {
+            mathVecCross(perpAttitude, myAtt, axis);
+        } else {
+           
+            mathVecCross(perpAttitude, axis, myAtt);
+        }
+        
+        mathVecNormalize(perpAttitude, 3);
+        
+        api.setAttitudeTarget(perpAttitude);
+        deltaAtt = angleBetweenAtt(startingAtt, myAtt);
+  
+        
+    }
+    
+}
+// We need a power down function
