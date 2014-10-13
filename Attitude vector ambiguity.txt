@@ -1,0 +1,21 @@
+
+Attitude Vector: x:0.013294 y:0.999874 z:-0.008630
+
+Attitude Vector: x:-0.008069 y:0.999966 z:-0.001925
+Attitude Vector: x:0.002306 y:0.999980 z:-0.005842
+
+
+Attitude Vector: x:0.009298 y:0.999297 z:0.036316
+
+
+Attitude Vector: x:0.024783 y:0.999529 z:0.018122
+
+Attitude Vector: x:0.026333 y:0.999545 z:0.01474
+
+Attitude Vector: x:0.002900 y:0.999924 z:-0.011966
+
+
+Attitude Vector: x:0.011524 y:0.999563 z:-0.027220
+Attitude Vector: x:0.015920 y:0.999840 z:-0.008099
+Attitude Vector: x:0.000819 y:0.999953 z:-0.009707
+Attitude Vector: x:0.008272 y:0.999966 z:0.000757

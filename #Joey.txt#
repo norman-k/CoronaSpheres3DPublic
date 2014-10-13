@@ -1,0 +1,33 @@
+float distance;
+float ZRState[12];
+float curPos[3];
+float tarPos[3];
+int tarPOI[3];
+
+
+void init(){
+    tarPos[0]= .8;
+    tarPos[1]=.8;
+    tarPos[2] =.8;
+    timeOn = false;
+}
+
+//translates data into readable format
+void translateZRState(){
+    for (int i =0; i < 3; i++) {
+	   curPos[i] = ZRState[i];   
+	}
+	DEBUG(("Location: x:%f y:%f z:%f\n", curPos[0], curPos[1], curPos[2]));
+	DEBUG(("Velocity: x:%f y:%f z:%f\n", ZRState[3], ZRState[4], ZRState[5]));
+	DEBUG(("Attitude Vector: x:%f y:%f z:%f\n", ZRState[6], ZRState[7], ZRState[8]));
+	DEBUG(("Rotation Rates: x:%f y:%f z:%f\n", ZRState[9], ZRState[10], ZRState[11]));
+}
+void aimBot(POI[3]){
+    
+}
+void loop(){
+    api.getMyZRState(ZRState);
+    translateZRState();
+    //api.setPositionTarget(tarPos);
+    
+}
