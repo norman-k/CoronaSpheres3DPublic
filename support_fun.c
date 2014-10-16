@@ -1,8 +1,7 @@
 /* This file just contains support functions that might be useful for later on. 
 shadDist computes the shortest distance from the Sphere to the shadow zone 
 ptCircleDist computes the distance from a point to a circle, possibly to find the distance from the sphere to some zone. 
-While I've made a shadDist that works with ptLineDist, I haven't made a zoneDist(int zone) that works well with ptCircleDist. 
-This is because it's yet to be seen whether zoneDist would ever be used. */
+willCollide shows if sphere is dangerously close to asteroid */
 
 #define AST_RAD 0.2; //radius of asteroid 
 #define EPSILON 0.2;
