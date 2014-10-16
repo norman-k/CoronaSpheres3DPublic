@@ -4,7 +4,7 @@ ptCircleDist computes the distance from a point to a circle, possibly to find th
 willCollide shows if sphere is dangerously close to asteroid */
 
 #define AST_RAD 0.2; //radius of asteroid 
-#define EPSILON 0.2;
+#define EPSILON 0.35;
 float AST_CENTER[3]; //center of asteroid
 float ltf_corner[3]; //top left forward corner 
 float lbf_corner[3]; //bottom left forward corner
