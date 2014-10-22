@@ -33,6 +33,7 @@ The main issue is preventing the radius from decreasing as time passes.
 
 *Added by Elvin* 
 
+Attempt #2 at general revolution.
 A work in progress - does not work/run properly right now. 
 Some of the code in it is scratch work and includes attempts at uniform circular motion. 
 To be scrapped for a Revolution 3! 
