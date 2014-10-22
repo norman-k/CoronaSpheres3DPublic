@@ -17,7 +17,6 @@ int pid;
 int sec;
 
 float pie;
-//float sec;
 void init() {
     api.getMyZRState(zrstate);
     pie = 3.14159265359;
