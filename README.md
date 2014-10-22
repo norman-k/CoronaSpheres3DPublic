@@ -20,6 +20,23 @@ The algorithm relies on vector algebra (namely the cross product).
 There's also some general vector functions that I've broken up that you can use: **angleBetween** and **angleBetweenAtt**.
 They'll give you the angle between generalized vectors and normalized vectors, respectively (in 3-space). 
 
+### Revolution
+
+*Added by Elvin* 
+
+Attempt #1 at general revolution. 
+Code runs successfully in some situations.
+In others, it only revolves properly for some of the time or gets stuck in the setup process. 
+The main issue is preventing the radius from decreasing as time passes.
+
+### Revolution 2
+
+*Added by Elvin* 
+
+A work in progress - does not work/run properly right now. 
+Some of the code in it is scratch work and includes attempts at uniform circular motion. 
+To be scrapped for a Revolution 3! 
+
 ### FindTangPoint
 
 *Added by Aaron* 
