@@ -1,3 +1,7 @@
+//only change from competitor1: takes into account solar flares more.
+//movement code still not updated. I realize it is updated on some other competitors here, but I wrote this before
+//they were uploaded. Sorry I didn't put this up earlier. Shouldn't be too hard to stick updated movement code in.
+
 float zrstate[12];
 float POI[3];
 float POI0[3];
