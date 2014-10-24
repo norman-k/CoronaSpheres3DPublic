@@ -1,5 +1,9 @@
 //Addition to Aaron's Competitor1. Basic detection and avoidance of asteroid collision.
 //Relies upon FindTangPoint to correct movement when it is not otherwise possible.
+
+//Keep in mind findTangPoint is still buggy. Once we have a master movement function, 
+//we should put it and its helper functions in their own file so people can easily put them in newer competitors.
+//-Aaron
 float zrstate[12];
 float POI[3];
 float POI0[3];
