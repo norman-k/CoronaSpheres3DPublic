@@ -1,9 +1,4 @@
-//Addition to Aaron's Competitor1. Basic detection and avoidance of asteroid collision.
-//Relies upon FindTangPoint to correct movement when it is not otherwise possible.
-
-//Keep in mind findTangPoint is still buggy. Once we have a master movement function, 
-//we should put it and its helper functions in their own file so people can easily put them in newer competitors.
-//-Aaron
+//Addition to Aaron's 
 float zrstate[12];
 float POI[3];
 float POI0[3];
@@ -182,7 +177,7 @@ void moveTo(float target[3]){
     mathVecCross(cross,zrstate,target);
     mathVecSubtract(sub,zrstate,target,3);
     float d = mathVecMagnitude(cross,3) / mathVecMagnitude(sub,3);
-    if (d > 0.33 || o > 0){
+    if (d > 0.33 || o > 0.1){ //change o > _ to get difference tolerances
         api.setPositionTarget(target);
     }else{
         float tmp[3];
@@ -193,6 +188,12 @@ void moveTo(float target[3]){
         //mathVecAdd(tmp,target,?,3);
         findTangPoint(tmp,loc,target,0.33);
         DEBUG(("COLLISION COURSE -> NEW COURSE (%f, %f, %f)\n",tmp[0],tmp[1],tmp[2]));
+        mathVecNormalize(sub,3);
+        int i = 0;
+        for (;i < 3;i++){
+            sub[i] = 0.2 * sub[i];
+        }
+        mathVecAdd(tmp,tmp,sub,3);
         api.setPositionTarget(tmp);
     }
 }
