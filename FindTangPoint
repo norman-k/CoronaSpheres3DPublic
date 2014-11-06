@@ -1,0 +1,25 @@
+//IMPORTANT: Requires angleBetween()
+//result: outputs tangent point on asteroid between target and location
+//point: input current location
+//targ: input target location
+//r: input radius of meteor plus sphere (I used 0.36 in testing)
+void findTangPoint(float result[3], float point[3],float targ[3], float r) {
+    float DNorms[3];
+    float D = mathVecMagnitude(point,3);
+    mathVecNormalize(point,3);
+    mathVecNormalize(targ,3);
+    mathVecSubtract(DNorms,targ,point,3);
+    mathVecNormalize(DNorms,3);
+    float alpha = acosf(r/D);
+    float beta = angleBetween(point,DNorms);
+    float theta = beta - alpha;
+    float dist = sinf(alpha)/sinf(theta);
+    DNorms[0] = DNorms[0]*dist;
+    DNorms[1] = DNorms[1]*dist;
+    DNorms[2] = DNorms[2]*dist;
+    mathVecAdd(result,point,DNorms,3);
+    mathVecNormalize(result,3);
+    result[0] = result[0] * r;
+    result[1] = result[1] * r;
+    result[2] = result[2] * r;
+}
