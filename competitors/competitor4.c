@@ -1,19 +1,5 @@
-//Just different enough from last competitor to justify a new competitor
-//TEST RESULTS (AGAINST LAST SUBMISSION, 5 AS RED, 5 AS BLUE):
-//W 22.20-13.50
-//W 18.74-9.76
-//W 19.27-0.80
-//W 15.94-19.76
-//W 28.96-21.87
-//W 13.37-9.94
-//L 11.87-15.10
-//L -8.25-19.61
-//W 24.26-7.77
-//W 26.97-6.76
 //Updates:
-//+ Bacon-like movement features implemented
-//+ As a result, spends a lot less time near asteroid, smaller risk of crashing
-//+ Overall logic improved considerably
+//+ Very minor things that (hopefully) don't need to be tested because we can't test anything
 //Issues:
 //-Weird bug with taking second picture sometimes
 //-Logic still not quite sound on whether or not to go for a second POI (only time taken into account, not distance or opponent.)
@@ -35,6 +21,7 @@ int INTERVALS;
 int pics;
 unsigned int lastPicTime;
 int timeoff;
+float dist[3];
 
 float getDist(float pt1[3], float pt2[3]) {
     return sqrtf(mathSquare(pt2[2] - pt1[2]) + mathSquare(pt2[1] - pt1[1]) + mathSquare(pt2[0] - pt1[0]));
@@ -202,6 +189,20 @@ void goFast(float targt[3]) {
     api.setPositionTarget(targt);
 }
 
+/*void moveFast(float pt1[3], float pt2[3]){
+  float velocity=mathVecMagnitude(myVelocity,3);
+  float threshold=0.5*distance + velocity*velocity/(0.0086*4);
+  if (distance>threshold){
+    DEBUG(("using VelocityTarget"));
+    DEBUG(("threshold:%f \n distance:%f",threshold,distance));
+    api.setVelocityTarget(vectorBetween);
+  }
+  else{
+    DEBUG(("using PositionTarget"));
+    api.setPositionTarget(pt2);
+  }
+}*/
+
 void init(){
     lastPicTime = 0;
     INTERVALS=60;
@@ -223,6 +224,11 @@ void loop(){
     api.getMyZRState(zrstate);
     int flare = game.getNextFlare();
     int time = api.getTime();
+    mathVecSubtract(dist,target,zrstate,3);
+    if (mathVecMagnitude(dist,3) > 0.1 || state==2 || state==3) {
+        game.takePic(ID);
+        lastPicTime = time;
+    }
     
     if (flare%5 == 0) {
         DEBUG(("%i",flare));
@@ -333,6 +339,7 @@ void loop(){
     if (state == 2) {
         if (mathVecMagnitude(zrstate,3) > 0.53) {
             game.uploadPic();
+            lastPicTime = time;
             pics = 0;
             target[0] = -0.45;
             target[1] = 0;
@@ -345,7 +352,8 @@ void loop(){
     }
     
     if (state == 3) {
-        game.takePic(ID);
+        //game.takePic(ID);
+        //lastPicTime = time;
         if (time%INTERVALS < (INTERVALS-20)) {//GUESSWORK
             ID = getClosestPOI(POI,POI0,POI1,POI2, POIS, zrstate);
             getPOI(POI,ID);
