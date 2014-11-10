@@ -239,7 +239,7 @@ void init(){
     INTERVALS=60;
     POIS[0] = 1;
     POIS[1] = 1;
-    POIS[2] = 0;
+    POIS[2] = 1;
     api.getMyZRState(zrstate);
     state = 0;
     ID = getClosestPOI(POI,POI0,POI1,POI2, POIS, zrstate);
