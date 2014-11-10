@@ -1,7 +1,8 @@
+//THIS MAY NOT BE THE LAST VERSION UPLOADED TONIGHT
 //Updates:
-//+ Very minor things that (hopefully) don't need to be tested because we can't test anything
+//+Has faster movement code, but it doesn't interact well with other sphere when using it, so it doesn't use
+//+Worked around weird bug with taking second picture sometimes
 //Issues:
-//-Weird bug with taking second picture sometimes
 //-Logic still not quite sound on whether or not to go for a second POI (only time taken into account, not distance or opponent.)
 //-A few numbers are still off
 //-STILL DOES NOT TAKE OTHER COMPETITOR INTO ACCOUNT
@@ -14,14 +15,15 @@ float POI2[3];
 float angle[3];
 float target[3];
 bool POIS[3];
-float midpoint[3];
 int ID;
 char state;
 int INTERVALS;
 int pics;
 unsigned int lastPicTime;
 int timeoff;
-float dist[3];
+char mode;
+float score;
+float lastscore;
 
 float getDist(float pt1[3], float pt2[3]) {
     return sqrtf(mathSquare(pt2[2] - pt1[2]) + mathSquare(pt2[1] - pt1[1]) + mathSquare(pt2[0] - pt1[0]));
@@ -95,7 +97,7 @@ bool canTakePic
             api.getTime() - timeoff >= 5;
 }
 
-void moveTo(float target[3]){
+void moveTo(float target[3]) {
     DEBUG(("\n"));
     if (clearPath(target)){ 
         DEBUG(("SET COURSE FOR (%f, %f, %f)\n",target[0],target[1],target[2]));
@@ -103,31 +105,12 @@ void moveTo(float target[3]){
     } 
     else {
         float tmp[3];
-        //float tmp2[3];
-        //float sub[3];
-        /*findTangPoint(tmp,zrstate,target,0.33);
-        tmp[0] = tmp[0] * 1.2;
-        tmp[1] = tmp[1] * 1.2;
-        tmp[2] = tmp[2] * 1.2;
-        if (tmp[0]) {//If this is null, this should be false, right?
-            DEBUG(("TRUE%f",tmp[0]));
-        }//if findTangPoint breaks, use goAround
-        else {
-            DEBUG(("FALSE%f",tmp[0]));
-            DEBUG(("!!!FINDTANGPOINT BROKE!!!\n"));
-            goAround(tmp,zrstate,target,0.33);
-        }*/
         if (mathVecMagnitude(zrstate,3) <= 0.39)
             goAround(tmp,zrstate,target,0.33, 5);
         else
             findTangPoint(tmp,zrstate,target,0.33);
             
-        //mathVecSubtract(sub,tmp,zrstate,3);
-        //mathVecNormalize(sub,3);
-        //mathVecAdd(tmp2,tmp,sub,3);
         DEBUG(("COLLISION COURSE -> NEW COURSE (%f, %f, %f)\n",tmp[0],tmp[1],tmp[2]));
-        //DEBUG(("COLLISION COURSE -> ACTUAL NEW VELOCITY (%f, %f, %f)\n",tmp2[0],tmp2[1],tmp2[2]));
-        //api.setVelocityTarget(tmp2);
         goFast(tmp);
     }
 }
@@ -171,37 +154,54 @@ void findTangPoint(float result[3], float point[3],float targt[3], float r) {
 }
 
 void goFast(float targt[3]) {
-    float targ[3];
-    float mag;
-    mathVecSubtract(targ,targt,zrstate,3);
-    mag = mathVecMagnitude(targ,3);
-    if (mag <= 0.2) {
+    if (mode != 1) {
+        float targ[3];
+        float mag;
+        mathVecSubtract(targ,targt,zrstate,3);
+        mag = mathVecMagnitude(targ,3);
+        if (mag <= 0.2) {
+            api.setPositionTarget(targt);
+        }
+        else {
+            targ[0] = targ[0] * mag * mag * 40;
+            targ[1] = targ[1] * mag * mag * 40;
+            targ[2] = targ[2] * mag * mag * 40;
+            mathVecAdd(targ,targt,targ,3);
+            DEBUG(("ACTUAL TARGET: %f,%f,%f",targ[0],targ[1],targ[2]));
+            api.setPositionTarget(targ);
+        }
         api.setPositionTarget(targt);
     }
     else {
-        targ[0] = targ[0] * mag * mag * 40;
-        targ[1] = targ[1] * mag * mag * 40;
-        targ[2] = targ[2] * mag * mag * 40;
-        mathVecAdd(targ,targt,targ,3);
-        DEBUG(("ACTUAL TARGET: %f,%f,%f",targ[0],targ[1],targ[2]));
-        api.setPositionTarget(targ);
+        float mag = mathVecMagnitude(targt,3);
+        float norm[3];
+        float par[3];
+        float tmp[3];
+        float vel[3];
+        tmp[0] = POI[0] * 1.9;
+        tmp[1] = POI[1] * 1.9;
+        tmp[2] = POI[2] * 1.9;
+        norm[0] = zrstate[0];
+        norm[1] = zrstate[1];
+        norm[2] = zrstate[2];
+        float tmpmag = mag-mathVecMagnitude(norm,3);
+        mathVecNormalize(norm,3);
+        norm[0] = norm[0]*tmpmag*0.62;
+        norm[1] = norm[1]*tmpmag*0.62;
+        norm[2] = norm[2]*tmpmag*0.62;
+        mathVecSubtract(par,tmp,zrstate,3);
+        mathVecNormalize(par,3);
+        par[0] = par[0] * 0.1;
+        par[1] = par[1] * 0.1;
+        par[2] = par[2] * 0.1;
+        mathVecAdd(vel,par,norm,3);
+        DEBUG(("MODE 1; NORM: %f,%f,%f\n",norm[0],norm[1],norm[2]));
+        DEBUG(("MODE 1; PAR: %f,%f,%f\n",par[0],par[1],par[2]));
+        DEBUG(("MODE 1; VELOCITY TARGET: %f,%f,%f",vel[0],vel[1],vel[2]));
+        api.setVelocityTarget(vel);
+        api.setAttitudeTarget(angle);
     }
-    api.setPositionTarget(targt);
 }
-
-/*void moveFast(float pt1[3], float pt2[3]){
-  float velocity=mathVecMagnitude(myVelocity,3);
-  float threshold=0.5*distance + velocity*velocity/(0.0086*4);
-  if (distance>threshold){
-    DEBUG(("using VelocityTarget"));
-    DEBUG(("threshold:%f \n distance:%f",threshold,distance));
-    api.setVelocityTarget(vectorBetween);
-  }
-  else{
-    DEBUG(("using PositionTarget"));
-    api.setPositionTarget(pt2);
-  }
-}*/
 
 void init(){
     lastPicTime = 0;
@@ -218,17 +218,17 @@ void init(){
     target[2] = 1.9*POI[2];
     pics = 0;
     timeoff = 0;
+    mode = 0;
+    score = 9.00;
+    lastscore = 9.00;
 }
 
 void loop(){
+    lastscore = score;
+    score = game.getScore();
     api.getMyZRState(zrstate);
     int flare = game.getNextFlare();
     int time = api.getTime();
-    mathVecSubtract(dist,target,zrstate,3);
-    if (mathVecMagnitude(dist,3) > 0.1 || state==2 || state==3) {
-        game.takePic(ID);
-        lastPicTime = time;
-    }
     
     if (flare%5 == 0) {
         DEBUG(("%i",flare));
@@ -281,23 +281,25 @@ void loop(){
         if (canTakePic(POI,zrstate,0.8,0.42,0.31,ID)) {
             if (flare > 8 || flare < 0) {
                 game.takePic(ID);
-                DEBUG(("TOOK FIRST PIC"));
-                lastPicTime = time;
-                pics++;
-                if ((flare < 17 && flare > 0) || 240 - time < 17) {
-                    DEBUG(("%i SECONDS UNTIL NEXT FLARE, BAIL!", flare));
-                    target[0] = 4*POI[0]; 
-                    target[1] = 4*POI[1];
-                    target[2] = 4*POI[2];
-                    POIS[ID] = 0;//LOGIC NOT FULLY SOUND
-                    state = 2;//WE WILL HAVE TO STORE WETHER YOU CAN TAKE INNER AND 
-                }//WETHER YOU CAN TAKE OUTER. THIS MEANS CHANGING A LOT OF STUFF.
-                else {
-                    DEBUG(("%i SECONDS UNTIL NEXT FLARE, GO FOR IT!", flare));
-                    target[0] = 2.5*POI[0];
-                    target[1] = 2.5*POI[1];
-                    target[2] = 2.5*POI[2];
-                    state = 1;
+                if (game.getScore() > lastscore ) {
+                    DEBUG(("TOOK FIRST PIC OF ID %i", ID));
+                    lastPicTime = time;
+                    pics++;
+                    if ((flare < 17 && flare > 0) || 240 - time < 17) {
+                        DEBUG(("%i SECONDS UNTIL NEXT FLARE, BAIL!", flare));
+                        target[0] = 4*POI[0]; 
+                        target[1] = 4*POI[1];
+                        target[2] = 4*POI[2];
+                        POIS[ID] = 0;//LOGIC NOT FULLY SOUND
+                        state = 2;//WE WILL HAVE TO STORE WETHER YOU CAN TAKE INNER AND 
+                    }//WETHER YOU CAN TAKE OUTER. THIS MEANS CHANGING A LOT OF STUFF.
+                    else {
+                        DEBUG(("%i SECONDS UNTIL NEXT FLARE, GO FOR IT!", flare));
+                        target[0] = 2.5*POI[0];
+                        target[1] = 2.5*POI[1];
+                        target[2] = 2.5*POI[2];
+                        state = 1;
+                    }
                 }
             }
         }
@@ -310,27 +312,30 @@ void loop(){
     if (state == 1) {
        if (canTakePic(POI,zrstate,0.4,0.53,0.42,ID)) {
             game.takePic(ID);
-            DEBUG(("TOOK SECOND PICTURE, %i SECONDS SINCE LAST", 
-                time-lastPicTime));
-            lastPicTime = time;
-            pics++;
-            POIS[ID] = 0;
-            if ((flare > 0 && flare < 15)
-            || (time%INTERVALS > (INTERVALS-20))) {
-                target[0] = 4*POI[0];
-                target[1] = 4*POI[1];
-                target[2] = 4*POI[2];
+            if (game.getScore() > lastscore ) {
+                DEBUG(("TOOK SECOND PICTURE of %i, %i SECONDS SINCE LAST", 
+                    ID, time-lastPicTime));
+                lastPicTime = time;
+                pics++;
+                POIS[ID] = 0;
+                if ((flare > 0 && flare < 15)
+                || (time%INTERVALS > (INTERVALS-20))) {
+                    target[0] = 4*POI[0];
+                    target[1] = 4*POI[1];
+                    target[2] = 4*POI[2];
+                }
+                else {
+                    ID = getClosestPOI(POI,POI0,POI1,POI2, POIS, zrstate);
+                    getPOI(POI,ID); 
+                    goAround(target,zrstate,POI, 0.33, 1);
+                    mathVecNormalize(target, 3);
+                    target[0] = target[0] * 0.6;
+                    target[1] = target[1] * 0.6;
+                    target[2] = target[2] * 0.6;
+                    //mode = 1;
+                }
+                state = 2;
             }
-            else {
-                ID = getClosestPOI(POI,POI0,POI1,POI2, POIS, zrstate);
-                getPOI(POI,ID); 
-                goAround(target,zrstate,POI, 0.33, 1);
-                mathVecNormalize(target, 3);
-                target[0] = target[0] * 0.6;
-                target[1] = target[1] * 0.6;
-                target[2] = target[2] * 0.6;
-            }
-            state = 2;
         }
         moveTo(target);
         api.setAttitudeTarget(angle);
@@ -339,7 +344,7 @@ void loop(){
     if (state == 2) {
         if (mathVecMagnitude(zrstate,3) > 0.53) {
             game.uploadPic();
-            lastPicTime = time;
+            mode = 0;
             pics = 0;
             target[0] = -0.45;
             target[1] = 0;
@@ -352,8 +357,7 @@ void loop(){
     }
     
     if (state == 3) {
-        //game.takePic(ID);
-        //lastPicTime = time;
+        game.takePic(ID);
         if (time%INTERVALS < (INTERVALS-20)) {//GUESSWORK
             ID = getClosestPOI(POI,POI0,POI1,POI2, POIS, zrstate);
             getPOI(POI,ID);
@@ -374,4 +378,3 @@ void loop(){
         moveTo(target);
     }
 }
-         
