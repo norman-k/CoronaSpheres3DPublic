@@ -1,6 +1,17 @@
-//THIS MAY NOT BE THE LAST VERSION UPLOADED TONIGHT
+//FINAL VERSION AS OF NOVEMBER 9
+//TEST AGAINST LAST COMPETITOR:
+//L 16.03 19.64
+//W 23.27 14.43
+//W 10.87 4.75
+//L 9.38  12.41
+//W 22.25 22.24
+//W 23.22 16.99
+//W 22.34 13.39
+//W 25.96 2.79
+//W 28.45 20.63
+//L 16.00 16.05
 //Updates:
-//+Has faster movement code, but it doesn't interact well with other sphere when using it, so it doesn't use
+//+Faster movement code to move through a point rather than to it
 //+Worked around weird bug with taking second picture sometimes
 //Issues:
 //-Logic still not quite sound on whether or not to go for a second POI (only time taken into account, not distance or opponent.)
@@ -203,6 +214,26 @@ void goFast(float targt[3]) {
     }
 }
 
+float collision_distance (int s) {//by michael jin
+	float s1[12];	//my SPHERE
+	float s2[12];	//enemy SPHERE
+	//s1 s2 prediction scheme for next second
+	api.getOtherZRState(s2);
+	api.getMyZRState(s1);
+	s1[0] = s1[0] + s*s1[3];  //x position next second
+	s1[1] = s1[1] + s*s1[4];  //y position next second
+	s1[2] = s1[2] + s*s1[5];  //z position next second
+	s2[0] = s2[0] + s*s2[3];  //x position next second
+	s2[1] = s2[1] + s*s2[4];  //y position next second
+	s2[2] = s2[2] + s*s2[5];  //z position next second
+	float dist = 0.0f;
+	dist = dist + ((s2[0]-s1[0]) * (s2[0]-s1[0]));
+	dist = dist + ((s2[1]-s1[1]) * (s2[1]-s1[1]));
+	dist = dist + ((s2[2]-s1[2]) * (s2[2]-s1[2]));
+	dist = sqrtf(dist);	//norm of distance vector
+	return dist;
+}
+
 void init(){
     lastPicTime = 0;
     INTERVALS=60;
@@ -229,6 +260,16 @@ void loop(){
     api.getMyZRState(zrstate);
     int flare = game.getNextFlare();
     int time = api.getTime();
+    
+    if (mode == 1) {//if using faster movement, check for possible collisions
+	    if (collision_distance(0) > 0.4 || 
+	        collision_distance(1) > 0.4 ||
+	        collision_distance(2) > 0.4 ||
+	        collision_distance(3) > 0.4) {
+	        mode = 0;
+	        DEBUG(("BETTER SWITCH TO MODE 0!"));
+	    }
+    }
     
     if (flare%5 == 0) {
         DEBUG(("%i",flare));
@@ -332,7 +373,7 @@ void loop(){
                     target[0] = target[0] * 0.6;
                     target[1] = target[1] * 0.6;
                     target[2] = target[2] * 0.6;
-                    //mode = 1;
+                    mode = 1;
                 }
                 state = 2;
             }
