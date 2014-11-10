@@ -35,6 +35,8 @@ int timeoff;
 char mode;
 float score;
 float lastscore;
+float disp[3];
+float distance;
 
 float getDist(float pt1[3], float pt2[3]) {
     return sqrtf(mathSquare(pt2[2] - pt1[2]) + mathSquare(pt2[1] - pt1[1]) + mathSquare(pt2[0] - pt1[0]));
@@ -106,6 +108,13 @@ bool canTakePic
             mathVecMagnitude(state,3) < maxDist)) &&
             api.getTime() - lastPicTime >= 3 &&
             api.getTime() - timeoff >= 5;
+}
+
+bool nearPOI
+    (float POI[3], float state[12], float maxAngle, float maxDist, float minDist, int ID) {
+    return (fabsf(angleBetween(state,POI)) < maxAngle &&
+            (minDist < mathVecMagnitude(state,3) && 
+            mathVecMagnitude(state,3) < maxDist));
 }
 
 void moveTo(float target[3]) {
@@ -252,6 +261,8 @@ void init(){
     mode = 0;
     score = 9.00;
     lastscore = 9.00;
+    mathVecSubtract(disp,target,zrstate,3);
+    distance = mathVecMagnitude(disp,3);
 }
 
 void loop(){
@@ -260,6 +271,13 @@ void loop(){
     api.getMyZRState(zrstate);
     int flare = game.getNextFlare();
     int time = api.getTime();
+    mathVecSubtract(disp,target,zrstate,3);
+    distance = mathVecMagnitude(disp,3);
+    
+    if (state != 1 && (state >= 2 || distance >= 0.1)) {
+        game.takePic(ID);
+        lastPicTime = time;
+    }
     
     if (mode == 1) {//if using faster movement, check for possible collisions
 	    if (collision_distance(0) > 0.4 || 
@@ -398,7 +416,6 @@ void loop(){
     }
     
     if (state == 3) {
-        game.takePic(ID);
         if (time%INTERVALS < (INTERVALS-20)) {//GUESSWORK
             ID = getClosestPOI(POI,POI0,POI1,POI2, POIS, zrstate);
             getPOI(POI,ID);
