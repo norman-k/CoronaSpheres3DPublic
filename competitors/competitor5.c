@@ -325,8 +325,8 @@ void loop(){
         float otherstate[12];
         api.getOtherZRState(otherstate);
         if (nearPOI(POI,otherstate,1.0,0.7,0.45,ID) && 
-            nearPOI(POI,zrstate,2.0,0.45,0.2,ID) &&
-            mathVecMagnitude(otherstate,3) - mathVecMagnitude(zrstate,3) > .08) {
+            nearPOI(POI,zrstate,1.8,0.45,0.2,ID) &&
+            mathVecMagnitude(otherstate,3) - mathVecMagnitude(zrstate,3) > .1) {
             DEBUG(("OPPONENT CAN PUSH US; BAIL!"));
             target[0] = 2.5*POI[0];
             target[1] = 2.5*POI[1];
