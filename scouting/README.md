@@ -1,7 +1,5 @@
-CSV files of possible alliance teams from the 3D Leaderboard. May be useful or something, I dunno. 
+CSV files of possible alliance teams from the 3D Leaderboard and a short/messy python file to calculate things. May be useful - Junhao
 
-*Usage:*
+**Usage:**
 
 `python calc.py <FILE_NAME>`
-
-- Junhao
