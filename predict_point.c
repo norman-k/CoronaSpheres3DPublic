@@ -1,3 +1,7 @@
+/*
+	Michael Jin - Predict future location with same magnitude from origin
+*/
+
 void rotVec (float* t, bool isRed) {        //must set x axis negative if you start as red
     float quat[4] = {cosf(.3), sinf(.3), 0, 0};     //.6 radian difference from now
     if (isRed) {            //start as red sphere
